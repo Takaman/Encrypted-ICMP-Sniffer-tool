@@ -1,7 +1,5 @@
 # Overview
 
-Based on https://github.com/DhavalKapil/icmptunnel https://github.com/lucadibello/WeaponizedPing 
-
 Based on MITRE Tactics: T1572 Protocol Tunneling, T1030 Data Transfer Size Limits, T1567 Exfiltration Over Web Service, T1090 Multi-hop Proxy
 
 Encrypted version for ICMP tunneling. 
