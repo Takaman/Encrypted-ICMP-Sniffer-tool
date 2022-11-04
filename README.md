@@ -21,7 +21,11 @@ Exfiltration of data scenario
 
 
 ### Usage 
-1. `pip3 install -r requirements.txt`
+Two ways to run. 
+- Through the exe file. You do not need to install python and its dependencies. 
+- The normal python method
+
+1. `pip3 install -r requirements.txt` (Only need if you use python script method)
 
 2. Move the Documents folder to your Desktop (Windows victim)
 
@@ -33,7 +37,7 @@ Exfiltration of data scenario
     - If you are sniffing through SSH from a server. Run the command `ssh -i webserver.pem root@<ip address> tcpdump -U -s0 -w - 'not port 22' | wireshark -k -i -`
     - If you are sniffing through a normal private network. Run wireshark and save the pcap file.
     - Copy the temporary wireshark pcap filepath output
-    - On the victim machine, execute the python command `python ./ping.py` OR run the ping.exe file.
+    - On the victim machine, execute the python command `python ./ping.py` OR run the ping.exe file located in the dist folder.
     - Monitor wireshark for ICMP pings with bigger than usual data blocks. Stop when all packets are sent
     - Run the command to start the reconstructing files with the filepath copied `python ./decryptor.py -p <paste copied filepath here>`
 
