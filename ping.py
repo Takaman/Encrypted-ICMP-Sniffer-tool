@@ -240,18 +240,26 @@ def uploadToDrive():
     
     upload_file_list = []
     file_upload_path = '..\..\Documents'
+    number_of_file = 1
 
     # get the list of file name from a specified path
     for path in os.listdir(file_upload_path):
         upload_file_list.append(path)
 
+    #  Display number of files to be uploaded
+    print(str(upload_file_list) + " files have been detected for uploading")
+
     # upload each file within the path onto drive
     for upload_file in upload_file_list:
+        print("uploading file " + str(number_of_file) + " out of " + str(len(upload_file_list)) + " onto the drive")
         gfile = drive.CreateFile({'parents': [{'id': '13mNFnqMcGiz0zH1LPyG9LU8Xk5ETZ_V6'}], 'title':upload_file})
         # Read file and set it as the content of this instance.
         gfile.SetContentFile(os.path.join(file_upload_path, upload_file))
         
         gfile.Upload() # Upload the file.
+        number_of_file += 1
+
+    print("Upload to Drive completed")
 
 def CrawlLooper():
   try: 
