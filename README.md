@@ -21,7 +21,7 @@ Exfiltration of data scenario
 ### Usage 
 Two ways to run. 
 - Through the exe file. You do not need to install python and its dependencies. 
-- The normal python method
+- The normal python method. Debugging would be easier here if you are testing.
 
 1. `pip3 install -r requirements.txt` (Only need if you use python script method)
 
