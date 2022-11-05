@@ -24,7 +24,7 @@ def decryptAES(content):
         print(f"Wrong")
     return decrypt_AES
 
-#Only sniff the echo packets and not the replies
+#Only sniff the echo request packets and not other types
 def startICMPSniffer(filepath):
     print("Starting ICMP sniffer....")
     sniff(filter="icmp [icmptype] == 8", offline=filepath, prn=receiveData)
@@ -43,12 +43,14 @@ def receiveData(packet):
 
         # Decrypts the AES key from our RSA private key
         AESkey = decryptAES(raw[-128:])
+
         # Creating the AES keychain for decrypting our file
         try:
             aes = AES.new(AESkey, AES.MODE_CFB, iv)
         except ValueError as ve:
             print(f"Wrong")
             return
+
         # Decrypts the data portion of the ICMP data field
         decrypted = aes.decrypt(raw[:-144])
         decoded = decrypted.decode('latin-1')
@@ -63,7 +65,7 @@ def receiveData(packet):
         if endmatched is not None:
             print("EOF")
             f = open(filename,"ab")
-            # -9 Because dont take the <<<EOF>>> but write the rest
+            # We -9 Because dont take the <<<EOF>>> but write the rest
             f.write(decrypted[8:-9])
             f.close()
             filename="" #reinitialise the variable
