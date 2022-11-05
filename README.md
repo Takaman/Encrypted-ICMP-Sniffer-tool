@@ -12,7 +12,7 @@ This is for testing purposes only. Use it at your own risk and only on authorise
 
 ## Topology 
 Exfiltration of data scenario
-![ICMP an0nymizer (1)](https://user-images.githubusercontent.com/91510432/199385807-3f38685b-4c55-4eba-bd30-271af9bc2d56.png)
+![ICMP an0nymizer](https://user-images.githubusercontent.com/92675249/200108432-744d9d1a-0ef7-49f2-86c4-73efccf2072f.jpeg)
 
 ### Overview of an encrypted packet
 ![Screenshot_3](https://user-images.githubusercontent.com/91510432/199401514-62c5d4ef-88d5-4632-8312-259aee4c9328.png)
