@@ -2,11 +2,9 @@
 
 Based on MITRE Tactics: T1572 Protocol Tunneling, T1030 Data Transfer Size Limits, T1567 Exfiltration Over Web Service, T1090 Multi-hop Proxy
 
-Encrypted version for ICMP tunneling. 
+Exfiltration of data in a restricted network environment. For a school project.
 
-Exfiltration of data in a restricted network environment can be a tough thing to do. When you do things like plugging USB, moving and sending files across networks to yourself, it all leaves an audit trail. This audit trail can be even stronger when used with powerful endpoint protection tools like CrowdStrike. Even when you try to cover your tracks and footprints, using VPNs and deleting log files, there is still a possibility of being traced back to you when digital forensics is being conducted. This could result in the court ordering ISP, service providers to give up subscriber’s VPN information. 
-
-ICMP packets are usually used for troubleshooting network configurations or to check whether hosts are alive. We utilise this to send information or files out to other public endhosts.  
+ICMP packets are usually used for troubleshooting network configurations or to check whether hosts are alive. We utilise this to send information or files out to other public endhosts in an encrypted way.
 
 This is for testing purposes only. Use it at your own risk and only on authorised targets. Some parts of the source code are hard-coded to test functionality of the program, do take a look before executing.
 
