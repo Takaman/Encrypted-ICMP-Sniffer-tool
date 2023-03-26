@@ -17,7 +17,7 @@ Exfiltration of data scenario
 
 ### Video Example
 
-https://user-images.githubusercontent.com/91510432/227699071-6c7bcff9-3f16-496e-a5ab-d763def06f61.mp4
+https://user-images.githubusercontent.com/91510432/227759904-e787a31e-916b-42b0-bb7f-18980918c511.mp4
 
 
 
